@@ -502,7 +502,7 @@ EMAIL_FROM=noreply@yourcompany.com
 # Web3Forms API Key
 # Replace with your actual Web3Forms API key
 # The verification key for password reset will be sent to the mail associated with the API key
-# You can get your API key from https://web3forms.com/dashboard
+# You can get your API key from https://web3forms.com
 WEB3FORMS_API_KEY=enter_your_api_key_here
 ```
 
