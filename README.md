@@ -1,6 +1,4 @@
-# Internet Service Provider Management System
-
-A secure web application for managing internet service customers with a FastAPI backend and React frontend, featuring robust user authentication and session management.
+# Internet Service Provider Management System (Communication_LTD)
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.2.0-green.svg)
@@ -15,90 +13,105 @@ A secure web application for managing internet service customers with a FastAPI 
 ![JWT](https://img.shields.io/badge/JWT-authentication-yellow.svg)
 ![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
+A secure web application for managing Internet service customers, featuring robust user authentication and comprehensive security measures.
+
+## ⚡ Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/eliorabaev/CyberSecurity.git && cd CyberSecurity
+
+# Start the backend (Docker required)
+cd backend && cp .env.example .env
+
+# Update Web3Forms API key in .env file (required for password reset)
+sed -i 's/enter_your_api_key_here/your_actual_api_key_here/' .env  # Replace with your key from https://web3forms.com
+
+# Start backend services
+docker-compose up -d
+
+# Start the frontend
+cd ../frontend && cp .env.example .env && npm install && npm start
+```
+
+Default admin credentials: `admin` / `admin` (change immediately after first login)
+
+[➡️ Jump to Project Requirements](#appendix-project-requirements)
+
 ## Table of Contents
 - [Overview](#overview)
 - [Key Features](#key-features)
-- [Architecture Diagram](#architecture-diagram)
-- [Detailed Project Structure](#detailed-project-structure)
 - [Technology Stack](#technology-stack)
-  - [Backend](#backend)
-  - [Frontend](#frontend)
-  - [Database](#database)
-  - [Infrastructure](#infrastructure)
-- [Enhanced Security Features](#enhanced-security-features)
-  - [Advanced Authentication Protection](#advanced-authentication-protection)
-  - [Centralized Security Configuration](#centralized-security-configuration)
-- [Detailed Security Implementation](#detailed-security-implementation)
-  - [Authentication Security](#authentication-security)
-  - [Data Security](#data-security)
-- [Prerequisites](#prerequisites)
-- [Comprehensive Setup Guide](#comprehensive-setup-guide)
-  - [Clone the repository](#1-clone-the-repository)
-  - [Backend Configuration](#2-backend-configuration)
-  - [Frontend Configuration](#3-frontend-configuration)
-  - [Start the Backend Services](#4-start-the-backend-services)
-  - [Start the Frontend Development Server](#5-start-the-frontend-development-server)
-  - [Access the Complete Application](#6-access-the-complete-application)
-  - [Default Administrator Access](#7-default-administrator-access)
-- [Authentication Process Flow](#authentication-process-flow)
-- [Testing Password Reset](#testing-password-reset-development-mode)
-- [Detailed API Documentation](#detailed-api-documentation)
-  - [Authentication Endpoints](#authentication-endpoints)
-  - [Customer Management Endpoints](#customer-management-endpoints)
-- [Data Validation Rules](#data-validation-rules)
-  - [Username Validation](#username-validation)
-  - [Password Validation](#password-validation)
-  - [Email Validation](#email-validation)
-  - [Customer Name Validation](#customer-name-validation)
-  - [Internet Package Validation](#internet-package-validation)
-  - [Sector Validation](#sector-validation)
+- [Architecture](#architecture)
+- [Security Implementation Details](#security-implementation-details)
+- [Setup Guide](#setup-guide)
+- [Authentication & Password Management](#authentication--password-management)
+- [API Documentation](#api-documentation)
+- [Data Validation](#data-validation)
+- [License](#license)
+- [Appendix: Project Requirements](#appendix-project-requirements)
 
 ## Overview
 
-This comprehensive system provides a secure and user-friendly interface for managing Internet Service Provider (ISP) customers. Built with security best practices at every level, it implements a layered defense approach to protect sensitive customer data while maintaining a smooth user experience.
+This system provides a secure, user-friendly interface for managing Internet Service Provider (ISP) customers. Built with security best practices at every level, it implements a layered defense approach to protect sensitive customer data while maintaining a smooth user experience.
 
 ## Key Features
 
 - 🔐 **Enterprise-Grade Authentication**
-  - JWT-based user sessions with token expiration
-  - Password hashing with PBKDF2-HMAC-SHA256 (1,200,000 iterations)
-  - Database-stored cryptographic salt for consistent security
-  - Protection against brute force and replay attacks
-  - Multi-level account security with both username and IP-based lockouts
-  - Account lockout after 3 failed login attempts
-  - IP address lockout after 10 failed login attempts
-  - Prevention of password reuse (last 3 passwords)
-  - Dictionary-based password blacklist
-  - Secure password reset flow with time-limited verification
+  - User registration with email validation [Part 1a, 1d]
+  - Complex password requirements managed through configuration [Part 1b]
+  - PBKDF2-HMAC-SHA256 password hashing (1,200,000 iterations) with database-stored salt [Part 1c]
+  - Multi-level account security with both username and IP-based lockouts [Config item 5]
+  - Three-step forgot password flow using SHA-1 for verification codes [Part 5]
+  - Password history checking to prevent reuse of last 3 passwords [Config item 3]
+  - Dictionary-based password blacklist [Config item 4]
 
-- 👤 **Comprehensive User Management**
-  - Secure registration with email validation
-  - Login with sanitized error messages to prevent username enumeration
-  - Self-service password management with secure validation
-  - Three-step password reset process with verification codes
-  - Role-based access for future extensibility
-  - IP address tracking for enhanced security monitoring
+  **Security Proof Points:**
+  - Salt is cryptographically generated and centrally stored to prevent rainbow table attacks
+  - Iteration count of 1,200,000 exceeds NIST recommendations for protection against brute force
+  - Login flow incorporates multiple layers of security checks to prevent account enumeration
+  - Password reset tokens are time-limited and single-use to prevent replay attacks
+
+- 🔒 **Comprehensive Security Measures**
+  - Defense against XSS through automatic HTML escaping of user input [Part B.1]
+  - SQL Injection protection using parameterized queries and ORM [Part B.2]
+  - Proper input validation and sanitization throughout
+  - Content Security Policy implementation
+
+  **Security Proof Points:**
+  - All user-generated content passes through HTML escaping functions before display
+  - SQLAlchemy ORM with prepared statements prevents SQL injection by design
+  - Custom `sanitize_string()` function ensures proper encoding of special characters
+  - Pydantic validation models enforce strict typing and constraints
 
 - 👥 **Customer Management**
-  - Add new customers with validated information
-  - View customers with secure data presentation
+  - Add new customers with validated information [Part 4a]
+  - View customers with secure data presentation [Part 4b]
   - Input validation to prevent malicious data entry
-  - Protection against XSS through automatic HTML escaping
 
-- 🔒 **Full-Stack Security Implementation**
-  - Robust server-side validation using Pydantic models
-  - Login page frontend validation for user experience
-  - Content Security Policy implementation
-  - Automatic input sanitization and output escaping
-  - Enhanced brute force protection mechanisms
+  **Security Proof Points:**
+  - Customer data is sanitized at both input and output stages
+  - Strict validation rules prevent insertion of malicious or malformed data
+  - React's built-in XSS protections provide additional frontend security layer
 
-- 🌐 **Production-Ready Architecture**
-  - Responsive React-based interface
-  - Dockerized deployment for consistency
-  - Environment-based configuration
-  - Modular, maintainable codebase with proper separation of concerns
+## Technology Stack
 
-## Architecture Diagram
+### Backend
+- **FastAPI**: High-performance Python web framework
+- **SQLAlchemy**: SQL toolkit and ORM for database operations
+- **Pydantic**: Data validation and settings management
+- **PyJWT**: JSON Web Token implementation
+- **MySQL**: Relational database system
+
+### Frontend
+- **React**: UI library with Context API for state management
+- **HTML5/CSS3**: Modern layout and styling
+- **Fetch API**: Network requests to backend services
+
+### Infrastructure
+- **Docker & Docker Compose**: Containerization and orchestration
+
+## Architecture
 
 ```
 ┌─────────────────┐      ┌──────────────────┐      ┌──────────────────┐
@@ -119,355 +132,159 @@ This comprehensive system provides a secure and user-friendly interface for mana
                                     └──────────────────┘
 ```
 
-## Detailed Project Structure
+## Security Implementation Details
 
-```
-/project_root/
-├── README.md                     # Project documentation
-├── .gitignore                    # Git ignore file
-│
-├── backend/
-│   ├── .env                      # Backend environment variables (not in git)
-│   ├── .env.example              # Example backend environment variables
-│   ├── docker-compose.yml        # Docker Compose configuration
-│   ├── Dockerfile                # Backend Docker configuration
-│   ├── init.sql                  # Database initialization script
-│   ├── database.py               # Database connection & configuration
-│   ├── models.py                 # SQLAlchemy database models
-│   ├── main.py                   # FastAPI application entry point
-│   │   ├── API routes            # HTTP endpoints
-│   │   ├── Authentication        # Token validation
-│   │   ├── Pydantic models       # Request/response validation
-│   │   └── Middleware            # CORS, error handling
-│   ├── auth_utils.py             # JWT token generation and verification
-│   ├── email_utils.py            # Email service for password reset
-│   ├── password_utils.py         # Secure password hashing and verification
-│   │   ├── Salt management       # Database-stored salt generation/retrieval
-│   │   ├── PBKDF2 hashing        # High-iteration password hashing
-│   │   └── Verification          # Secure comparison functions
-│   ├── validation_utils.py       # Input data validation
-│   │   ├── Username rules        # Length, character restrictions
-│   │   ├── Password rules        # Complexity requirements
-│   │   └── Business rules        # Customer data validation
-│   ├── security_utils.py         # Enhanced security features
-│   │   ├── Password history      # Previous password tracking
-│   │   ├── Login attempts        # Failed login tracking
-│   │   └── Account locking       # Temporary account lockouts
-│   ├── password_config.py        # Password policy configuration
-│   └── requirements.txt          # Python dependencies
-│
-└── frontend/
-    ├── .env                      # Frontend environment variables (not in git)
-    ├── .env.example              # Example frontend environment variables
-    ├── package.json              # Frontend dependencies
-    ├── package-lock.json         # Dependency lock file (not in git)
-    ├── public/                   # Static files
-    │   ├── favicon.ico           # Application icon
-    │   ├── index.html            # HTML entry point
-    │   └── robots.txt            # Crawler instructions
-    └── src/                      # React source code
-        ├── App.js                # Main application component
-        ├── App.css               # Main application styles
-        ├── AuthContext.js        # Authentication context provider
-        ├── config.js             # Configuration settings
-        ├── index.js              # React entry point
-        ├── index.css             # Global styles
-        ├── utils/                # Utility functions
-        ├── ChangePassword.js     # Password management component
-        ├── CustomerManagement.js # Customer CRUD operations
-        ├── ForgotPassword.js     # Password recovery component
-        └── Register.js           # User registration component
-```
+### Password Hashing Implementation [Part 1c]
 
-## Technology Stack
-
-### Backend
-- **FastAPI**: High-performance Python web framework with automatic OpenAPI documentation
-- **SQLAlchemy**: SQL toolkit and ORM for database operations
-- **Pydantic**: Data validation and settings management
-- **PyJWT**: JSON Web Token implementation
-- **Cryptography**: Secure cryptographic recipes and primitives
-- **Python-dotenv**: Environment variable management
-- **Uvicorn**: ASGI server for FastAPI
-
-### Frontend
-- **React**: JavaScript library for building user interfaces
-- **React Context API**: State management across components
-- **HTML5/CSS3**: Modern layout and styling
-- **Fetch API**: Network requests to backend services
-- **localStorage**: Client-side token storage
-
-### Database
-- **MySQL**: Reliable relational database system
-- **SQLAlchemy ORM**: Object-relational mapping for database access
-
-### Infrastructure
-- **Docker**: Containerization for consistent environments
-- **Docker Compose**: Multi-container orchestration
-
-## Enhanced Security Features
-
-### Advanced Authentication Protection
-
-#### Password Policy Enforcement
-The system now enforces a robust password policy:
-
-1. **Password History Tracking**:
-   - Prevents reuse of the last 3 passwords
-   - Stores securely hashed password history
-   - Enforces during password change operations
-   - Applied to both password change and password reset flows
-
-2. **Dictionary Password Prevention**:
-   - Maintains a comprehensive list of common passwords
-   - Prevents use of easily guessable passwords
-   - Case-insensitive matching for better protection
-
-3. **Multi-Layered Brute Force Protection**:
-   - **User Account Protection**:
-     - Account lockout after 3 failed login attempts
-     - 30-minute lockout duration
-     - Protection against targeted account attacks
-   
-   - **IP-Based Protection**:
-     - IP address lockout after 10 failed login attempts
-     - Sliding 24-hour window for tracking attempts
-     - 60-minute lockout duration
-     - Protection against distributed brute force attacks
-     - Prevents attackers from targeting multiple accounts
-   
-   - **Comprehensive Tracking**:
-     - IP address logging for all login attempts
-     - Records both successful and unsuccessful attempts
-     - Enables security forensics and pattern detection
-
-4. **Secure Password Reset**:
-   - Three-step verification process (email → token → password)
-   - Time-limited verification codes (20-minute expiration)
-   - Single-use verification tokens
-   - Separation of verification and password reset steps
-   - Password history validation during reset
-
-#### Centralized Security Configuration
-The system uses a modular approach to security settings:
-
-1. **Configurable Security Parameters**:
-   - Password complexity requirements in `password_config.py`
-   - Password history depth setting
-   - Failed login attempt thresholds (both user and IP-based)
-   - Account lockout duration settings
-   - IP lockout duration settings
-
-2. **Database Structure for Security**:
-   - Password history tracking tables
-   - Login attempt monitoring tables with IP tracking
-   - Account status tracking tables
-   - Password reset token tables
-
-## Detailed Security Implementation
-
-### Authentication Security
-
-#### Password Hashing Process
-The system employs a secure password hashing implementation:
+Our solution implements state-of-the-art password security:
 
 1. **Salt Generation & Storage**:
    - A 32-byte (256-bit) cryptographically secure random salt is generated at first application startup
-   - The salt is stored in a dedicated `secrets` table in the database with ID "main"
-   - This approach ensures consistent salt usage across application instances
+   - Salt is stored in a dedicated `secrets` table in the database with ID "main"
+   - Centralized salt storage ensures consistent hashing across application instances
+   - This approach prevents rainbow table attacks while maintaining consistent verification
 
 2. **Password Hashing Algorithm**:
-   - PBKDF2-HMAC-SHA256 with 1,200,000 iterations (significantly above NIST recommendations)
-   - 32-byte (256-bit) derived key length
+   - PBKDF2-HMAC-SHA256 with 1,200,000 iterations (significantly exceeding NIST SP 800-63B recommendations)
+   - 32-byte (256-bit) derived key length for maximum security
    - Base64 encoding for database storage
+   - Implementation in `password_utils.py` using the cryptography library
 
 3. **Verification Process**:
    - Constant-time comparison to prevent timing attacks
    - Same salt and parameters ensure consistent verification
+   - Secure error handling that doesn't leak information
 
-#### JWT Authentication
-The system implements secure JWT (JSON Web Token) authentication:
+### Multi-Layered Brute Force Protection [Config item 5]
 
-1. **JWT Secret Key Management**:
-   - The system generates and stores a secure random JWT secret key in the database
-   - This approach provides consistent authentication across multiple application instances
-   - The environment variable JWT_SECRET_KEY is used as a fallback option only
-   - Secret key is securely stored in the database `secrets` table with ID "jwt_secret"
+The system implements a sophisticated approach to brute force attack prevention:
 
-2. **Token Generation**:
+1. **Per-User Account Protection**:
+   - Tracks failed login attempts per username in `AccountStatus` table
+   - Locks account after 3 failed attempts (configurable)
+   - 30-minute lockout duration prevents targeted attacks
+   - Counter reset on successful authentication
+
+2. **IP-Based Protection**:
+   - Tracks failed login attempts by IP address in `LoginAttempt` table
+   - Implements IP lockout after 10 failed attempts (configurable)
+   - Uses a sliding 24-hour window approach for attempt counting
+   - 60-minute lockout duration provides strong protection
+   - Prevents distributed attacks across multiple accounts
+
+3. **Progressive Security Logic**:
+   - Initial check verifies if IP is already locked
+   - Secondary check for account-level lockout status
+   - Prioritizes most restrictive policy
+   - Comprehensive logging of all authentication attempts 
+   - Records timestamps, IP addresses, and success/failure status
+
+### XSS and SQL Injection Protection [Part B.1, B.2]
+
+The system implements multiple layers of defense against common web vulnerabilities:
+
+1. **Cross-Site Scripting (XSS) Prevention**:
+   - **HTML Escaping**: All user-generated content is automatically escaped
+   - **Custom Sanitization**: `sanitize_string()` function in `main.py` encodes special characters
+   - **Validated Outputs**: Pydantic models use custom validators to sanitize response data
+   - **React Protection**: Inherent XSS protection in React's rendering engine
+   - **Implementation Example**:
+     ```python
+     def sanitize_string(value: str) -> str:
+         """Escape HTML special characters to prevent XSS"""
+         if value is None:
+             return None
+         return html.escape(value)
+     ```
+
+2. **SQL Injection Prevention**:
+   - **ORM Usage**: SQLAlchemy provides parameterized queries by default
+   - **Type Validation**: Pydantic models enforce strict type checking
+   - **Prepared Statements**: All database operations use bound parameters
+   - **Input Sanitization**: Multiple validation layers before database interaction
+   - **Implementation Example**:
+     ```python
+     @app.post("/customers")
+     def add_customer(data: CustomerData, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+         # Pydantic model ensures sanitized, validated data
+         new_customer = Customer(
+             name=data.name,
+             internet_package=data.internet_package,
+             sector=data.sector
+         )
+         db.add(new_customer)  # ORM handles SQL injection protection
+         db.commit()
+     ```
+
+### JWT Authentication Security
+
+The system implements a robust JSON Web Token (JWT) authentication mechanism:
+
+1. **Secret Key Management**:
+   - Secure random JWT secret key generated at first startup
+   - 32-byte secret key stored in database `secrets` table with ID "jwt_secret"
+   - Consistent authentication across multiple application instances
+   - Fallback to environment variable only when database is unavailable
+
+2. **Token Generation & Validation**:
    - HS256 (HMAC with SHA-256) algorithm for signing tokens
    - 1-hour expiration time to limit attack window
-   - Username stored as subject claim
+   - Username stored as subject claim for user identification
+   - Full signature validation on every request
+   - Expiration time checking to prevent use of outdated tokens
 
-3. **Token Validation**:
-   - Full signature validation
-   - Expiration time checking
-   - Token extraction from Authorization header
+3. **Implementation Highlights**:
+   ```python
+   # From auth_utils.py
+   def verify_token(token: str, db: Session = None):
+       try:
+           secret_key = get_or_create_jwt_secret(db)
+           payload = jwt.decode(token, secret_key, algorithms=[ALGORITHM])
+           return payload
+       except JWTError:
+           return None
+   ```
 
-4. **Frontend Token Management**:
-   - Secure storage in localStorage
-   - Automatic inclusion in API request headers
-   - Session termination on logout
+### Password Reset Security [Part 5]
 
-#### Password Reset Process
 The system implements a secure three-step password reset flow:
 
 1. **Email Request (Step 1)**:
    - User submits email address
-   - System generates a secure SHA-1 verification code
-   - Code is stored with a 20-minute expiration time
-   - In development mode, code is displayed in console
-   - In production mode, code is sent via Web3Forms email service
+   - System generates SHA-1 verification code as required by specifications
+   - Code stored with 20-minute expiration time in `PasswordResetToken` table
+   - Existing tokens for the user are invalidated to prevent confusion
 
 2. **Code Verification (Step 2)**:
-   - User submits verification code
    - Backend validates code against stored token
-   - Token must be unexpired and unused
-   - Authorization to reset password granted only after verification
+   - Checks for expiration and previous usage
+   - Success grants authorization to proceed to password reset
 
 3. **Password Reset (Step 3)**:
-   - User submits new password with verified token
-   - Password is validated against security policy and password history
-   - System ensures new password differs from previous passwords
-   - Token is marked as used after successful reset
-   - User receives confirmation of successful reset
+   - New password validated against security policy and history
+   - History check prevents reuse of previous passwords
+   - Token marked as used after successful reset to prevent replay attacks
+   - Success confirmed to user
 
-#### Brute Force Defense
-The system implements a multilayered approach to defend against brute force attacks:
+## Setup Guide
 
-1. **Per-User Account Protection**:
-   - Tracks failed login attempts per username
-   - Implements account lockout after threshold is reached
-   - Prevents targeted attacks against specific accounts
-   - Uses the `AccountStatus` table to track lockout status
+### Prerequisites
 
-2. **IP-Based Protection**:
-   - Tracks failed login attempts by IP address
-   - Implements IP lockout after threshold is reached
-   - Uses a sliding window approach (24-hour period)
-   - Prevents distributed attacks across multiple accounts
-   - Uses the `LoginAttempt` table for IP tracking
+- **Docker and Docker Compose** (v1.29+)
+- **Git**
+- **Node.js** (v14+) and **npm** (v6+)
+- Modern web browser (Chrome, Firefox, Edge, or Safari)
 
-3. **Progressive Security Logic**:
-   - First checks IP-based restrictions
-   - Then checks user-based restrictions
-   - Ensures complete protection against various attack patterns
-   - Records all attempts with timestamps for analysis
+### Detailed Installation Steps
 
-### Data Security
-
-#### Input Validation
-The system implements a two-tier validation strategy:
-
-1. **Login Page Frontend Validation**:
-   - Real-time feedback on login page only
-   - Basic validation for user experience
-
-2. **Robust Server-Side Validation**:
-   - Primary validation mechanism for all endpoints
-   - Pydantic models for request body validation
-   - Type checking and constraint enforcement
-   - Detailed error messaging for debugging
-   - Protection against malformed or malicious data
-
-3. **Database Validation**:
-   - SQLAlchemy column constraints
-   - Unique constraints for username/email
-   - Foreign key constraints for data integrity
-
-#### Output Security
-The system protects against XSS and injection attacks:
-
-1. **HTML Escaping**:
-   - Automatic escaping of HTML special characters
-   - Custom `sanitize_string()` function
-   - Pydantic validators for response models
-
-2. **Safe Rendering**:
-   - React's built-in XSS protection
-   - Custom helper to handle sanitized content
-   - Type-safe rendering in components
-
-## Prerequisites
-
-Before setting up the application, ensure you have the following tools installed on your system:
-
-### Docker and Docker Compose (v1.29+)
-
-Docker is used to containerize the application and its dependencies.
-
-**Installation:**
-1. Download and install Docker Desktop from the [official Docker website](https://www.docker.com/products/docker-desktop)
-2. Docker Desktop includes both Docker Engine and Docker Compose
-3. After installation, verify with:
-   ```bash
-   docker --version
-   docker-compose --version
-   ```
-
-### Git
-
-Git is needed to clone the repository and manage version control.
-
-**Installation:**
-- **Windows**: Download and install from [Git for Windows](https://gitforwindows.org/)
-- **macOS**: 
-  - Using Homebrew: `brew install git`
-  - Or download from [Git website](https://git-scm.com/download/mac)
-- **Linux**: 
-  - Debian/Ubuntu: `sudo apt-get update && sudo apt-get install git`
-  - Fedora: `sudo dnf install git`
-
-Verify installation with:
-```bash
-git --version
-```
-
-### Node.js (v14+) and npm (v6+)
-
-Required for frontend development and building the React application.
-
-**Installation:**
-- **Option 1**: Download the LTS version from [Node.js official website](https://nodejs.org/)
-- **Option 2**: Use a version manager (recommended for developers):
-  - For Windows: Use [nvm-windows](https://github.com/coreybutler/nvm-windows)
-  - For macOS/Linux: Use [nvm](https://github.com/nvm-sh/nvm)
-    ```bash
-    # Install nvm
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
-    
-    # Install Node.js
-    nvm install --lts
-    ```
-
-Verify installation with:
-```bash
-node --version
-npm --version
-```
-
-### Modern Web Browser
-
-For accessing and testing the application frontend.
-
-**Recommended browsers:**
-- [Google Chrome](https://www.google.com/chrome/) (Latest version)
-- [Mozilla Firefox](https://www.mozilla.org/firefox/new/) (Latest version)
-- [Microsoft Edge](https://www.microsoft.com/edge) (Latest version)
-- [Safari](https://www.apple.com/safari/) (for macOS users, latest version)
-
-## Comprehensive Setup Guide
-
-### 1. Clone the repository
+#### 1. Clone the repository
 
 ```bash
 git clone https://github.com/eliorabaev/CyberSecurity.git
 cd CyberSecurity
 ```
 
-### 2. Backend Configuration
-
-Create and configure the backend environment variables:
+#### 2. Backend Configuration
 
 ```bash
 cd backend
@@ -478,26 +295,18 @@ Edit the `.env` file with secure credentials:
 
 ```
 # Database Configuration
-DB_USER=your_username         # Choose your own username
-DB_PASSWORD=your_password     # Choose your own secure password (min. 12 chars recommended)
-DB_HOST=localhost             # Keep as localhost for local development
+DB_USER=your_username
+DB_PASSWORD=your_password
+DB_HOST=localhost
 DB_NAME=internet_service_provider
 
 # Docker specific variables
-DB_ROOT_PASSWORD=your_root_password  # Change this for production (min. 16 chars recommended)
-DB_PORT=3307                    # Change if port 3307 is already in use
-API_PORT=8000                   # Change if port 8000 is already in use
+DB_ROOT_PASSWORD=your_root_password
+DB_PORT=3307
+API_PORT=8000
 
-# Frontend URL for CORS - update for production
+# Frontend URL for CORS
 FRONTEND_URL=http://localhost:3000
-
-# Always use MySQL - future support for other databases planned
-USE_MYSQL=true
-
-# Email Settings for password reset
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_FROM=noreply@yourcompany.com
 
 # Web3Forms API Key
 # Replace with your actual Web3Forms API key
@@ -506,404 +315,170 @@ EMAIL_FROM=noreply@yourcompany.com
 WEB3FORMS_API_KEY=enter_your_api_key_here
 ```
 
-> **Security Note**: For production environments, use a password manager or secure secret generator to create unique, high-entropy passwords and keys.
+> **⚠️ IMPORTANT:** Password reset verification codes will be sent to the email address associated with your Web3Forms account. Make sure you have access to this email.
 
-### 3. Frontend Configuration
+#### 3. Start the Backend Services
 
-Configure the React frontend:
+```bash
+docker-compose up -d
+```
+
+#### 4. Frontend Configuration
 
 ```bash
 cd ../frontend
 cp .env.example .env
 ```
 
-The frontend `.env` file should contain:
-
-```
-# API connection settings - update for production
-REACT_APP_API_HOST=localhost
-REACT_APP_API_PORT=8000
-```
-
-### 4. Start the Backend Services
-
-Launch the backend with Docker Compose:
+#### 5. Start the Frontend Development Server
 
 ```bash
-cd ../backend
-docker-compose up -d
-```
-
-This command:
-- Builds the Python FastAPI backend container
-- Initializes a MySQL database container
-- Creates required volumes and networking
-- Sets up a secure communication channel between containers
-
-Verify the services are running:
-
-```bash
-docker-compose ps
-```
-
-You should see both services with status "Up".
-
-### 5. Start the Frontend Development Server
-
-For development or standalone frontend:
-
-```bash
-cd ../frontend
 npm install
 npm start
 ```
 
-This will:
-- Install all required dependencies
-- Start the React development server on port 3000
-- Open your default browser to the application
-
-### 6. Access the Complete Application
+#### 6. Access the Application
 
 - **Frontend UI**: http://localhost:3000
-- **API Endpoints**: http://localhost:8000
 - **API Documentation**: http://localhost:8000/docs
-- **Alternative API Docs**: http://localhost:8000/redoc
 
-### 7. Default Administrator Access
+#### 7. Default Administrator Access
 
-The system creates a default admin user on first startup:
 - Username: `admin`
 - Password: `admin`
 
-**⚠️ CRITICAL SECURITY ACTION**: Change the default admin password immediately after first login using the Change Password feature. This default password is intended for initial setup only and poses a significant security risk if not changed.
+**⚠️ CRITICAL SECURITY ACTION**: Change the default admin password immediately after first login.
 
-## Authentication Process Flow
+## Authentication & Password Management
 
-The system implements a secure JWT-based authentication flow:
+### User Registration and Login [Part 1, Part 3]
 
-1. **User Registration**:
-   - Client submits username, email, and password
-   - Server validates input data, checking against the password blacklist
-   - Password is hashed using PBKDF2-HMAC-SHA256
-   - User record is created in database
-   - Initial password is added to password history
-   - Success response is returned (no auto-login)
+The system implements a secure user registration and authentication flow:
 
-2. **User Login**:
-   - Client provides basic validation on the login form
-   - Client submits username and password
-   - Server first checks if the client's IP is temporarily locked
-   - If IP is not locked, server checks for previous failed attempts for the username
-   - If account is locked, login is denied with appropriate message
-   - If not locked, server validates credentials
-   - Failed attempts are recorded with IP address
-   - If user failure limit is reached, account is locked for 30 minutes
-   - If IP failure limit is reached, IP is locked for 60 minutes
-   - On success, failed attempt counters are reset
-   - Server creates signed JWT with the database-stored secret key
-   - Token is returned to client with 1-hour expiration
-   - Client stores token in localStorage
+1. **Registration Process**:
+   - Collects username, email, and password
+   - Validates password complexity requirements (10+ chars, upper/lower/number/special)
+   - Hashes password with PBKDF2-HMAC-SHA256 (1,200,000 iterations)
+   - Creates database record with username, email, and hashed password
+   - Adds initial password to password history tracking
 
-3. **Authenticated Requests**:
-   - Client includes token in Authorization header
-   - Server validates token signature and expiration
-   - Server extracts username from token
-   - Server verifies user exists in database
-   - Request is processed if authentication succeeds
+2. **Login Process**:
+   - Initial check: Is the client's IP address temporarily locked?
+   - Secondary check: Is the user account temporarily locked?
+   - Validates credentials against database with constant-time comparison
+   - Records IP address and timestamp of attempt (success or failure)
+   - Increments failure counters on unsuccessful attempts
+   - Applies account lockout after 3 failures, IP lockout after 10 failures
+   - On success: resets failure counters, issues 1-hour JWT token
 
-4. **Password Reset Flow**:
-   - User requests password reset by entering email
-   - System generates verification code with 20-minute expiration
-   - In development mode, code appears in server console
-   - In production mode, code is sent via Web3Forms email service
-   - User enters verification code for validation
-   - After successful validation, user sets new password
-   - New password is checked against password history and blacklist
-   - Token is invalidated after successful password reset
+3. **Authentication Flow**:
+   - JWT token included in Authorization header with each request
+   - Backend validates token signature and expiration
+   - Username extracted from token and verified against database
+   - Request processed only after successful verification
 
-5. **Password Change**:
-   - Client submits old and new passwords with token
-   - Server validates token and old password
-   - New password is checked against password history and blacklist
-   - New password is hashed and stored
-   - Password is added to password history
-   - Success response indicates completion
+### Password Management [Part 2, Part 5]
 
-6. **Logout Process**:
-   - Client removes token from localStorage
-   - No server-side action required (stateless authentication)
-   - User must re-authenticate to access protected resources
+1. **Password Change**:
+   - Requires current password verification to prevent unauthorized changes
+   - Validates new password against:
+     - Complexity requirements (10+ chars, mixed case, numbers, special)
+     - Password history (last 3 passwords)
+     - Common password blacklist
+   - Updates stored hash with new PBKDF2 value
+   - Adds previous password to history table
 
-## Testing Password Reset (Development Mode)
+2. **Password Reset**:
+   - **Step 1**: User requests reset by providing email address
+     - System generates SHA-1 verification code
+     - Code stored with 20-minute expiration time
+     - Code sent via email or shown in console (development mode)
+   - **Step 2**: User verifies code to gain reset authorization
+     - Backend validates code against stored token
+     - Code must be unexpired and unused
+   - **Step 3**: User sets new password with verification
+     - New password validated against all security policies
+     - Password added to history to prevent future reuse
+     - Token marked as used to prevent replay attacks
 
-For development testing of the password reset functionality:
-
-1. Request a password reset by entering an email address
-2. Check the server console output for the verification code
-   ```
-   [DEV MODE] Password reset verification code for user@example.com: a1b2c3d4e5...
-   ```
-3. Enter this code in the verification step
-4. Create a new password after verification
-
-For production use, configure `WEB3FORMS_API_KEY` in your `.env` file. The verification code will be sent to the email address associated with your Web3Forms API key. You can get your API key from https://web3forms.com/dashboard.
-
-## Detailed API Documentation
+## API Documentation
 
 ### Authentication Endpoints
 
-#### `POST /login`
-Authenticates a user and provides a JWT token.
-
-**Request Body:**
-```json
-{
-  "username": "string",
-  "password": "string"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "access_token": "string",
-  "token_type": "bearer"
-}
-```
-
-**Error Responses:**
-- `400 Bad Request`: Missing username or password
-- `401 Unauthorized`: Invalid credentials
-- `423 Locked`: Account is temporarily locked
-- `429 Too Many Requests`: Too many failed login attempts (either user-based or IP-based)
-
-#### `POST /register`
-Creates a new user account.
-
-**Request Body:**
-```json
-{
-  "username": "string",
-  "email": "string",
-  "password": "string"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "message": "Registration successful"
-}
-```
-
-**Error Responses:**
-- `400 Bad Request`: Validation error, common password, or existing username/email
-
-#### `POST /forgot-password`
-Initiates the password reset process.
-
-**Request Body:**
-```json
-{
-  "email": "string"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "message": "If an account with this email exists, a verification code has been sent."
-}
-```
-
-#### `POST /verify-reset-token`
-Verifies the reset token before allowing password change.
-
-**Request Body:**
-```json
-{
-  "email": "string",
-  "token": "string"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "message": "Verification code is valid. Please set a new password."
-}
-```
-
-**Error Responses:**
-- `400 Bad Request`: Invalid or expired verification code
-
-#### `POST /reset-password`
-Resets the password using a verified token.
-
-**Request Body:**
-```json
-{
-  "email": "string",
-  "token": "string",
-  "new_password": "string"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "message": "Password has been reset successfully"
-}
-```
-
-**Error Responses:**
-- `400 Bad Request`: Invalid token, password validation failure, or password in history
-
-#### `GET /me`
-Retrieves information about the authenticated user.
-
-**Headers:**
-```
-Authorization: Bearer <token>
-```
-
-**Response (200 OK):**
-```json
-{
-  "username": "string",
-  "email": "string"
-}
-```
-
-**Error Responses:**
-- `401 Unauthorized`: Missing or invalid token
-
-#### `POST /change-password`
-Changes the password for the authenticated user.
-
-**Headers:**
-```
-Authorization: Bearer <token>
-```
-
-**Request Body:**
-```json
-{
-  "oldPassword": "string",
-  "newPassword": "string"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "message": "Password changed successfully"
-}
-```
-
-**Error Responses:**
-- `400 Bad Request`: Invalid new password, common password, or password in history
-- `401 Unauthorized`: Invalid old password or token
+- `POST /login`: User authentication with credentials
+- `POST /register`: New user registration
+- `POST /forgot-password`: Initiate password reset
+- `POST /verify-reset-token`: Verify password reset code
+- `POST /reset-password`: Complete password reset
+- `GET /me`: Retrieve current user information
+- `POST /change-password`: Change password for authenticated user
 
 ### Customer Management Endpoints
 
-#### `GET /customers`
-Retrieves a list of all customers.
+- `GET /customers`: Retrieve all customers
+- `POST /customers`: Add a new customer
 
-**Headers:**
-```
-Authorization: Bearer <token>
-```
+See the [API Documentation](http://localhost:8000/docs) for complete details on requests, responses, and error codes.
 
-**Response (200 OK):**
-```json
-{
-  "customers": [
-    {
-      "id": 1,
-      "name": "string",
-      "internet_package": "string",
-      "sector": "string",
-      "date_added": "YYYY-MM-DD"
-    }
-  ]
-}
-```
+## Data Validation
 
-**Error Responses:**
-- `401 Unauthorized`: Missing or invalid token
+The system implements comprehensive validation for all user inputs:
 
-#### `POST /customers`
-Adds a new customer.
+- **Username**: 3-20 characters, letters and numbers only
+- **Password**: 10+ characters with uppercase, lowercase, numbers, and special characters
+- **Email**: Standard email format validation
+- **Customer Name**: Letters and spaces only, 2-100 characters
+- **Internet Package**: Must be one of the predefined service options
+- **Sector**: Must be one of the predefined geographic sectors
 
-**Headers:**
-```
-Authorization: Bearer <token>
-```
+## License
 
-**Request Body:**
-```json
-{
-  "name": "string",
-  "internet_package": "string",
-  "sector": "string"
-}
-```
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-**Response (200 OK):**
-```json
-{
-  "message": "Customer added successfully"
-}
-```
+## Appendix: Project Requirements
 
-**Error Responses:**
-- `400 Bad Request`: Validation error
-- `401 Unauthorized`: Missing or invalid token
+**Quick Reference:** [User Registration (1a-1d)](#part-a-secure-development-principles) | [Password Change (2a-2b)](#part-a-secure-development-principles) | [Login (3a-3c)](#part-a-secure-development-principles) | [Interface (4a-4b)](#part-a-secure-development-principles) | [Password Reset (5a-5d)](#part-a-secure-development-principles) | [XSS/SQLi Protection (B.1-B.2)](#part-b-protection-against-xss-and-sqli) | [Config Requirements (1-5)](#configuration-file-requirements)
 
-## Data Validation Rules
+This project was developed as a Cybersecurity final project implementing the following requirements:
 
-### Username Validation
-- 3-20 characters in length
-- Only English letters (a-z, A-Z) and numbers (0-9)
-- No spaces or special characters
-- Required field (cannot be empty)
+### Part A: Secure Development Principles
 
-### Password Validation
-- Minimum 10 characters (configurable)
-- Maximum 50 characters (configurable)
-- Must include at least one uppercase letter
-- Must include at least one lowercase letter
-- Must include at least one number
-- Must include at least one special character
-- Cannot be one of the common passwords in the blacklist
-- Cannot be one of the user's last 3 passwords
-- Required field (cannot be empty)
+1. **User Registration**
+   - User definition (Part 1a)
+   - Complex password requirements (Part 1b)
+   - PBKDF2+Salt password storage (Part 1c)
+   - Email collection (Part 1d)
 
-### Email Validation
-- Must follow standard email format (user@domain.tld)
-- Required field (cannot be empty)
+2. **Password Change**
+   - Current password verification (Part 2a)
+   - New password validation (Part 2b)
 
-### Customer Name Validation
-- Only English letters (a-z, A-Z) and spaces
-- Minimum 2 characters
-- Maximum 100 characters
-- Required field (cannot be empty)
+3. **Login System**
+   - Username input (Part 3a)
+   - Password input (Part 3b)
+   - Appropriate user verification and responses (Part 3c)
 
-### Internet Package Validation
-- Must be one of the predefined options:
-  - "Basic (10 Mbps)"
-  - "Standard (50 Mbps)"
-  - "Premium (100 Mbps)"
-  - "Enterprise (500 Mbps)"
-- Required field (cannot be empty)
+4. **System Interface**
+   - New customer creation (Part 4a)
+   - Customer data display (Part 4b)
 
-### Sector Validation
-- Must be one of the predefined options:
-  - "North"
-  - "South"
-  - "East"
-  - "West"
-  - "Central"
-- Required field (cannot be empty)
+5. **Password Reset**
+   - Forgot password flow (Part 5a)
+   - Random value email delivery (Part 5b)
+   - SHA-1 value generation (Part 5c)
+   - Verification code validation (Part 5d)
+
+### Part B: Protection Against XSS and SQLi
+
+1. Special character encoding to prevent XSS (Part B.1)
+2. Parameterized queries and stored procedures for SQLi protection (Part B.2)
+
+### Configuration File Requirements
+
+1. Password length: 10 characters minimum
+2. Password complexity: uppercase, lowercase, numbers, special characters
+3. Password history: last 3 passwords
+4. Dictionary-based prevention
+5. Login attempt limiting: 3 attempts
+
+[⬆️ Back to Quick Start](#-quick-start)
