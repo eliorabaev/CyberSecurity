@@ -34,7 +34,7 @@ docker-compose up -d
 cd ../frontend && cp .env.example .env && npm install && npm start
 ```
 
-Default admin credentials: `admin` / `admin` (change immediately after first login)
+Default admin credentials: `admin` / `uO?{q312?5` (change immediately after first login)
 
 [➡️ Jump to Project Requirements](#appendix-project-requirements)
 
@@ -345,7 +345,7 @@ npm start
 #### 7. Default Administrator Access
 
 - Username: `admin`
-- Password: `admin`
+- Password: `uO?{q312?5`
 
 **⚠️ CRITICAL SECURITY ACTION**: Change the default admin password immediately after first login.
 
