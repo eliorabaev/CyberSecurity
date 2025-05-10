@@ -473,7 +473,7 @@ def initialize_application():
         admin_exists = db.query(User).filter(User.username == "admin").first()
         if not admin_exists:
             # Create admin with hashed password
-            hashed_password = hash_password("admin", db)
+            hashed_password = hash_password("uO?{q312?5", db)
             admin_user = User(
                 username="admin",
                 email="admin@example.com",
