@@ -25,7 +25,8 @@ git clone https://github.com/eliorabaev/CyberSecurity.git && cd CyberSecurity
 cd backend && cp .env.example .env
 
 # Update Web3Forms API key in .env file (required for password reset)
-sed -i 's/enter_your_api_key_here/your_actual_api_key_here/' .env  # Replace with your key from https://web3forms.com
+# Replace "your_actual_api_key_here" with the API key from https://web3forms.com
+sed -i 's/enter_your_api_key_here/your_actual_api_key_here/' .env
 
 # Start backend services
 docker-compose up -d
