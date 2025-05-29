@@ -433,7 +433,12 @@ def add_customer(data: CustomerData, current_user: User = Depends(get_current_us
     db.add(new_customer)
     db.commit()
     
-    return {"message": "Customer added successfully"}
+    # Sanitize the customer name for safe inclusion in response message
+    # This prevents any potential XSS attacks even though validation should catch most issues
+    sanitized_name = sanitize_string(data.name)
+    
+    # Include the sanitized customer name in the success message
+    return {"message": f"Customer '{sanitized_name}' added successfully"}
 
 @app.get("/customers", response_model=CustomerListResponse)
 def get_customers(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
