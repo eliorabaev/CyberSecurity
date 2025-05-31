@@ -28,8 +28,8 @@ cd backend && cp .env.example .env
 # Replace "your_actual_api_key_here" with the API key from https://web3forms.com
 sed -i 's/enter_your_api_key_here/your_actual_api_key_here/' .env
 
-# Start backend services
-docker-compose up -d
+# Start backend services (remove any volumes and rebuild the images - in case you are coming from the vulnerable version)
+docker compose down -v && docker compose up --build -d
 
 # Start the frontend
 cd ../frontend && cp .env.example .env && npm install && npm start
