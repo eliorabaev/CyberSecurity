@@ -8,7 +8,7 @@ MIN_LENGTH = 10
 MAX_LENGTH = 50
 
 # Whether to require at least one uppercase letter
-REQUIRE_UPPERCASE = True
+REQUIRE_UPPERCASE = False
 
 # Whether to require at least one lowercase letter
 REQUIRE_LOWERCASE = True
